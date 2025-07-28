@@ -82,13 +82,19 @@ def main():
     print("=" * 50)
     
     while True:
+        print("\n" + "-" * 50)
+        print("ℹ️  Type 'quit' or 'exit' at any prompt to end the program")
+        print("-" * 50)
         print("\nPlease provide the company and job role:")
+        
         company = input("🏢 Company: ").strip()
         if company.lower() in {"quit", "exit"}:
+            print("\n👋 Exiting Interview Research Agent. Good luck with your interview preparation!")
             break
             
         role = input("💼 Job Role: ").strip()
         if role.lower() in {"quit", "exit"}:
+            print("\n👋 Exiting Interview Research Agent. Good luck with your interview preparation!")
             break
 
         if company and role:

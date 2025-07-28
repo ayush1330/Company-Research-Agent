@@ -34,8 +34,8 @@ class LangSmithConfig:
                 os.environ["LANGCHAIN_ENDPOINT"] = "https://api.smith.langchain.com"
             
             if not os.getenv("LANGCHAIN_PROJECT"):
-                # Create unique project name with timestamp
-                os.environ["LANGCHAIN_PROJECT"] = f"{self.project_name}-{uuid.uuid4().hex[:8]}"
+                # Use a consistent project name by default, but allow override via environment variable
+                os.environ["LANGCHAIN_PROJECT"] = self.project_name
             
             # Set API key if provided
             if api_key and not os.getenv("LANGCHAIN_API_KEY"):
