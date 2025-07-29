@@ -127,7 +127,7 @@ def main():
                     
                 # LangSmith trace link
                 if langsmith_config.is_enabled:
-                    print("\n" + "=" * 60)
+                    print("\n" + "=" * 80)
                     print(f"🔍 Research trace available at: https://smith.langchain.com/")
                     
             except Exception as e:
