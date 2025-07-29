@@ -1,14 +1,21 @@
 # Company Research Agent
 
-A powerful AI-powered tool that helps job seekers research companies and prepare for interviews by providing detailed insights into company backgrounds and interview processes.
+A powerful AI-powered tool that helps job seekers research companies and prepare for interviews by providing detailed insights into company backgrounds and interview processes. The agent uses web research and AI analysis to generate comprehensive preparation guides.
 
 ## 🚀 Features
 
-- **Company Background Research**: Get detailed information about a company's size, industry, culture, and recent news.
-- **Interview Process Insights**: Learn about typical interview stages, assessment methods, and common questions.
-- **Personalized Preparation Guide**: Receive tailored preparation advice including technical topics, behavioral areas, and recommended resources.
-- **Command-Line Interface**: Simple and intuitive interface for easy interaction.
-- **LangSmith Integration**: Built-in support for LangSmith for tracing and debugging.
+- **Company Background Research**: Get detailed information about a company's size, industry, culture, values, and recent news.
+- **Interview Process Insights**: Learn about typical interview stages, duration, assessment methods, and common questions.
+- **Comprehensive Preparation Guide**: Receive a personalized preparation guide including:
+  - Preparation timeline with actionable steps
+  - Technical topics and resources
+  - Behavioral interview preparation
+  - Company-specific tips
+  - Interview day advice
+  - Follow-up strategies
+- **Web Research Integration**: Automatically gathers and analyzes information from multiple sources.
+- **Structured Data Output**: Returns well-structured data in JSON format for easy processing.
+- **Robust Error Handling**: Gracefully handles errors and provides fallback content.
 
 ## 📦 Installation
 
@@ -26,27 +33,70 @@ A powerful AI-powered tool that helps job seekers research companies and prepare
 
 3. Install the dependencies:
    ```bash
-   pip install -e .
+   pip install -r requirements.txt
    ```
 
 4. Set up environment variables:
-   Create a `.env` file in the project root and add your API keys:
-   ```
-   LANGCHAIN_API_KEY=your_langchain_api_key
-   # Add other required API keys
-   ```
+   - Copy `.env.example` to `.env`
+   - Update the `.env` file with your API keys:
+     ```
+     # OpenAI API Key (required)
+     OPENAI_API_KEY=your_openai_api_key_here
+     
+     # Firecrawl API Key (if required)
+     FIRECRAWL_API_KEY=your_firecrawl_api_key_here
+     
+     # LangSmith Configuration (optional)
+     LANGCHAIN_TRACING_V2=true
+     LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+     LANGCHAIN_API_KEY=your_langsmith_api_key_here
+     LANGCHAIN_PROJECT=your_project_name_here
+     ```
 
 ## 🛠 Usage
 
-1. Run the application:
-   ```bash
-   python main.py
-   ```
+### Command Line Interface
 
-2. Follow the interactive prompts:
-   - Enter the company name you're interested in
-   - Specify the job role you're applying for
-   - Review the generated research and preparation guide
+Run the main application:
+```bash
+python main.py
+```
+
+Follow the interactive prompts to enter the company name and job role.
+
+### Programmatic Usage
+
+You can also use the workflow programmatically:
+
+```python
+from src.workflow import Workflow
+
+# Initialize the workflow
+workflow = Workflow()
+
+# Run the workflow
+result = workflow.run(
+    company="Google",
+    role="Software Engineer"
+)
+
+# Access the results
+print("Company Background:", result.background)
+print("Interview Process:", result.interview_process)
+print("Preparation Guide:", result.preparation_guide)
+```
+
+### Test Script
+
+A test script is provided to quickly test the workflow:
+
+```bash
+# Test with default values (Google, Software Engineer)
+python test_workflow.py
+
+# Test with custom company and role
+python test_workflow.py "Microsoft" "Data Scientist"
+```
 
 3. Example usage:
    ```

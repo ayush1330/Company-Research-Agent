@@ -1,78 +1,195 @@
+from typing import Dict, Any, List, Optional, Union
+from datetime import datetime
+import json
+
 class InterviewResearchPrompts:
     """Collection of prompts for researching company interview processes"""
 
-    # Company background research prompts
-    BACKGROUND_SYSTEM = """You are an expert researcher specializing in company research for job candidates. 
-                        Extract key information about the company that is relevant to interview preparation."""
+    # ===== COMPANY RESEARCH PROMPTS =====
+    @staticmethod
+    def get_company_research_system_prompt() -> str:
+        return """You are an expert researcher specializing in company research for job candidates. 
+        Extract and structure key information about the company from the provided research content.
+        Be precise and only include information that can be clearly inferred from the content.
+        If information is not available, use 'Unknown' rather than making assumptions."""
 
+    @staticmethod
+    def get_company_research_user_prompt(company: str, research_content: str) -> str:
+        return f"""Analyze the following research content about {company} and extract the requested information:
+        
+        ===== RESEARCH CONTENT =====
+        {research_content}
+        ===== END OF CONTENT =====
+        
+        Extract the following information as a JSON object with these exact field names:
+        {{
+            "company_size": "Estimated number of employees (e.g., '1-10', '11-50', '51-200', '201-500', '501-1000', '1001-5000', '5001-10000', '10001+')",
+            "industry": "Primary industry or industries the company operates in",
+            "company_culture": "A brief description of the company culture (1-2 sentences)",
+            "values": ["List", "of", "core", "values"],
+            "recent_news": ["List", "of", "recent", "news", "or", "developments"]
+        }}
+        
+        Only respond with the JSON object, nothing else. Ensure the response is valid JSON."""
+
+    # ===== INTERVIEW PROCESS PROMPTS =====
+    @staticmethod
+    def get_interview_process_system_prompt() -> str:
+        return """You are an expert in analyzing technical interview processes. 
+        Extract and structure key information about the interview process from the provided research content.
+        Be precise and only include information that can be clearly inferred from the content.
+        If information is not available, use null rather than making assumptions."""
+
+    @staticmethod
+    def get_interview_process_user_prompt(company: str, role: str, research_content: str) -> str:
+        return f"""Analyze the following research content about the interview process for {role} at {company} and extract the requested information:
+        
+        ===== RESEARCH CONTENT =====
+        {research_content}
+        ===== END OF CONTENT =====
+        
+        Extract the following information as a JSON object with these exact field names:
+        {{
+            "typical_stages": ["List", "of", "typical", "interview", "stages"],
+            "duration": "Estimated duration from first contact to offer (e.g., '2-4 weeks')",
+            "common_questions": ["List", "of", "commonly", "asked", "questions"],
+            "technical_assessment": true/false,
+            "system_design": true/false,
+            "behavioral_focus": true/false,
+            "coding_challenges": true/false,
+            "take_home_projects": true/false,
+            "difficulty_level": "Easy/Moderate/Difficult"
+        }}
+        
+        Only respond with the JSON object, nothing else. Ensure the response is valid JSON.
+        If a field cannot be determined, use null for that field."""
+
+    # ===== PREPARATION GUIDE PROMPTS =====
+    @staticmethod
+    def get_prep_guide_system_prompt() -> str:
+        return """You are an expert career coach and technical interviewer. 
+        Create a comprehensive, actionable preparation guide for a candidate based on the provided 
+        company and interview process information. Provide specific, practical advice that would 
+        help a candidate succeed in their interview process."""
+
+    @staticmethod
+    def get_prep_guide_user_prompt(company: str, role: str, background: Dict[str, Any], process: Dict[str, Any]) -> str:
+        background_str = json.dumps(background, indent=2, ensure_ascii=False)
+        process_str = json.dumps(process, indent=2, ensure_ascii=False)
+        
+        return f"""Create a detailed preparation guide for a {role} position at {company}.
+        
+        COMPANY BACKGROUND:
+        {background_str}
+        
+        INTERVIEW PROCESS:
+        {process_str}
+        
+        INSTRUCTIONS:
+        1. Create a structured guide with clear sections and actionable steps
+        2. Include specific preparation strategies based on the company's interview process
+        3. Provide technical study recommendations if technical assessments are mentioned
+        4. Include behavioral preparation tips if behavioral interviews are part of the process
+        5. Suggest resources for further study (e.g., books, online courses, practice platforms)
+        6. Include general interview tips and best practices
+        
+        FORMAT YOUR RESPONSE AS A JSON OBJECT with these fields:
+        {{
+            "overview": "Brief overview of the preparation strategy",
+            "timeline": {{
+                "1_week_before": ["List", "of", "actions"],
+                "3_days_before": ["List", "of", "actions"],
+                "day_before": ["List", "of", "actions"],
+                "interview_day": ["List", "of", "actions"]
+            }},
+            "technical_preparation": {{
+                "topics_to_study": ["List", "of", "topics"],
+                "practice_resources": ["List", "of", "resources"],
+                "project_ideas": ["List", "of", "project", "ideas"]
+            }},
+            "behavioral_preparation": {{
+                "common_questions": ["List", "of", "questions"],
+                "star_method_tips": "Tips for using the STAR method",
+                "company_specific_tips": "Specific advice for this company"
+            }},
+            "additional_tips": ["List", "of", "additional", "tips"]
+        }}
+        
+        Only respond with the JSON object, nothing else. Ensure the response is valid JSON."""
+
+    # ===== LEGACY PROMPTS (for backward compatibility) =====
+    # These will be gradually phased out
+    BACKGROUND_SYSTEM = property(get_company_research_system_prompt)
+    PROCESS_SYSTEM = property(get_interview_process_system_prompt)
+    PREP_SYSTEM = property(get_prep_guide_system_prompt)
+    
     @staticmethod
     def background_user(company: str) -> str:
-        return f"""Company: {company}
-        Extract the following information from available sources:
-        - Company size (number of employees)
-        - Industry and primary business focus
-        - Company culture description (3-5 key adjectives)
-        - Core values (list 3-5 values)
-        - Recent news/events affecting hiring (last 6 months)
+        return InterviewResearchPrompts.get_company_research_user_prompt(company, "")
+    
+    # ===== PREPARATION GUIDE PROMPTS =====
+    @staticmethod
+    def get_prep_guide_system_prompt() -> str:
+        return """You are an expert career coach and technical interviewer. 
+        Create a comprehensive, actionable preparation guide for a candidate based on the provided 
+        company and interview process information. Provide specific, practical advice that would 
+        help a candidate succeed in their interview process."""
 
-        Format your response as JSON with keys: 
-        company_size, industry, company_culture, values, recent_news"""
+    @staticmethod
+    def get_prep_guide_user_prompt(company: str, role: str, background: Dict[str, Any], 
+                                 process: Dict[str, Any], company_research: str, 
+                                 interview_research: str) -> str:
+        """Generate a user prompt for creating a preparation guide."""
+        return f"""Create a detailed preparation guide for a {role} position at {company}.
+        
+        ===== COMPANY BACKGROUND =====
+        {json.dumps(background, indent=2, ensure_ascii=False)}
+        
+        ===== INTERVIEW PROCESS =====
+        {json.dumps(process, indent=2, ensure_ascii=False)}
+        
+        ===== RESEARCH CONTENT =====
+        {company_research}
+        
+        ===== INTERVIEW RESEARCH =====
+        {interview_research}
+        
+        INSTRUCTIONS:
+        1. Create a structured guide with clear sections and actionable steps
+        2. Include specific preparation strategies based on the company's interview process
+        3. Provide technical study recommendations if technical assessments are mentioned
+        4. Include behavioral preparation tips if behavioral interviews are part of the process
+        5. Suggest resources for further study (e.g., books, online courses, practice platforms)
+        6. Include general interview tips and best practices
+        
+        FORMAT YOUR RESPONSE AS A JSON OBJECT with these fields:
+        {{
+            "overview": "Brief overview of the preparation strategy",
+            "timeline": {{
+                "1_week_before": ["Task 1", "Task 2"],
+                "3_days_before": ["Task 1", "Task 2"],
+                "day_before": ["Task 1", "Task 2"]
+            }},
+            "technical_preparation": {{
+                "topics_to_study": ["List", "of", "topics"],
+                "practice_resources": ["List", "of", "resources"],
+                "project_ideas": ["List", "of", "project", "ideas"]
+            }},
+            "behavioral_preparation": {{
+                "common_questions": ["List", "of", "questions"],
+                "star_method_tips": "Tips for using the STAR method",
+                "company_specific_tips": "Specific advice for this company"
+            }},
+            "additional_tips": ["List", "of", "additional", "tips"]
+        }}
+        
+        Only respond with the JSON object, nothing else. Ensure the response is valid JSON."""
 
-    # Interview process research prompts
-    PROCESS_SYSTEM = """You are an expert in analyzing interview processes. Focus on extracting details 
-                      relevant to software engineering candidates. Pay special attention to technical 
-                      assessments and behavioral expectations."""
-
+    # Helper methods for backward compatibility
     @staticmethod
     def process_user(company: str, role: str) -> str:
-        return f"""Company: {company}
-        Role: {role}
-        
-        Analyze the typical interview process and provide:
-        - List of typical interview stages (e.g., phone screen, technical round, system design)
-        - Estimated duration from first contact to offer
-        - List of 5-7 common technical questions
-        - List of 5-7 common behavioral questions
-        - Flags indicating if they use: 
-          * technical_assessment (coding tests)
-          * system_design (architecture questions)
-          * behavioral_focus (culture-fit questions)
-          * coding_challenges (live coding)
-          * take_home_projects
-        
-        Format your response as JSON with keys:
-        typical_stages, duration, common_questions, technical_assessment, 
-        system_design, behavioral_focus, coding_challenges, take_home_projects"""
-
-    # Preparation guide generation prompts
-    PREP_SYSTEM = """You are a senior hiring manager with 15+ years of experience at top tech companies. 
-                   Create actionable, specific preparation advice for candidates. Focus on practical 
-                   strategies rather than generic advice."""
-
+        return InterviewResearchPrompts.get_interview_process_user_prompt(company, role, "")
+    
     @staticmethod
-    def prep_user(company: str, role: str, background: dict, process: dict) -> str:
-        return f"""Company: {company} | Role: {role}
-        
-        Company Background:
-        - Size: {background.get('company_size', 'N/A')}
-        - Industry: {background.get('industry', 'N/A')}
-        - Culture: {background.get('company_culture', 'N/A')}
-        - Values: {', '.join(background.get('values', []))}
-        - Recent News: {', '.join(background.get('recent_news', []))}
-        
-        Interview Process:
-        - Stages: {', '.join(process.get('typical_stages', []))}
-        - Duration: {process.get('duration', 'N/A')}
-        - Technical Assessment: {'Yes' if process.get('technical_assessment') else 'No'}
-        - System Design: {'Yes' if process.get('system_design') else 'No'}
-        - Behavioral Focus: {'Yes' if process.get('behavioral_focus') else 'No'}
-        
-        Create a preparation guide covering:
-        1. Technical Topics: List 5-7 specific technical areas to focus on (programming languages, frameworks, concepts)
-        2. Behavioral Topics: List 3-5 key behavioral/values-based areas to prepare stories for
-        3. Resources: Recommend 3-5 specific resources (books, courses, practice platforms)
-        4. Strategy: 2-3 sentence preparation strategy addressing company's specific process
-        5. Common Pitfalls: 3-4 common mistakes candidates make in this company's process
-        
-        Format your response as JSON with keys:
-        technical_topics, behavioral_topics, resources, strategy, common_pitfalls"""
+    def prep_user(company: str, role: str, background: Dict[str, Any], process: Dict[str, Any]) -> str:
+        return InterviewResearchPrompts.get_prep_guide_user_prompt(company, role, background, process)
