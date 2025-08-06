@@ -6,8 +6,10 @@ import time
 
 load_dotenv()
 
+# Initialize LangSmith
+
 def display_company_background(background):
-    print("\n🏢 Company Background")
+    print("\n🏢 Company Information")
     print("=" * 40)
     print(f"- Size: {background.company_size}")
     print(f"- Industry: {background.industry}")
